@@ -119,3 +119,46 @@ class UserListView(APIView):
         users = User.objects.all().order_by('id')
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+
+
+class MeView(APIView):
+    """
+    GET /api/auth/me/
+    Header: Authorization: Bearer <access_token>
+    Trả về thông tin của user đang đăng nhập.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+
+class UserDetailView(APIView):
+    """
+    GET /api/auth/users/<id>/
+    Header: Authorization: Bearer <access_token>
+    Admin xem bất kỳ user, user thường chỉ xem chính mình.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        # Non-admin users can only view their own profile
+        if not request.user.is_staff and request.user.pk != pk:
+            return Response(
+                {'detail': 'You do not have permission to view this user.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(
+                {'detail': 'User not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data)

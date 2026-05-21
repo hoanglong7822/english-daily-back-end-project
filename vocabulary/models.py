@@ -26,6 +26,17 @@ class VocabularyCollection(models.Model):
         return self.name
 
 class VocabularyCollectionWord(models.Model):
+    class WordType(models.TextChoices):
+        NOUN        = 'noun',        'Danh từ'
+        VERB        = 'verb',        'Động từ'
+        ADJECTIVE   = 'adjective',   'Tính từ'
+        ADVERB      = 'adverb',      'Trạng từ'
+        PREPOSITION = 'preposition', 'Giới từ'
+        CONJUNCTION = 'conjunction', 'Liên từ'
+        PRONOUN     = 'pronoun',     'Đại từ'
+        INTERJECTION = 'interjection', 'Thán từ'
+        OTHER       = 'other',       'Khác'
+
     collection = models.ForeignKey(
         VocabularyCollection,
         on_delete=models.CASCADE,
@@ -42,6 +53,19 @@ class VocabularyCollectionWord(models.Model):
 
     pronunciation = models.CharField(
         max_length=255,
+        blank=True,
+        null=True
+    )
+
+    word_type = models.CharField(
+        max_length=20,
+        choices=WordType.choices,
+        blank=True,
+        null=True
+    )
+
+    image_url = models.URLField(
+        max_length=500,
         blank=True,
         null=True
     )
